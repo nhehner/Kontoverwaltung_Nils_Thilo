@@ -2,8 +2,6 @@
 
 namespace AppBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,66 +12,88 @@ use AppBundle\Entity\User;
 class UserController extends FOSRestController
 {
     /**
-     * @Rest\Get("/user")
+     * @Rest\Post("/login")
+     * @return View
      */
-    public function getAction()
+    public function loginAction()
     {
-        $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findAll();
-        if ($restResult === null) {
-            return new View("there are no users exist", Response::HTTP_NOT_FOUND);
+        $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+
+        if ($contentType === "application/json") {
+            $content = trim(file_get_contents("php://input"));
+            $decoded = json_decode($content, true);
+
+            if (is_array($decoded)) {
+                /** @var user|null $restResult */
+                $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findOneBy(['benutzername' => $decoded['username']]);
+
+                if ($restResult === null) {
+                    return new View("There are no users exist", Response::HTTP_NOT_FOUND);
+                }
+
+                if ($restResult->getPasswort() === $decoded['password']) {
+                    return new View($restResult->getId(), Response::HTTP_OK);
+                } else {
+                    return new View("Something went wrong, please try again", Response::HTTP_BAD_REQUEST);
+                }
+            } else {
+                return new View("Recieved non valid json data", Response::HTTP_BAD_REQUEST);
+            }
         }
-        return $restResult;
+        return new View("Recieved non valid json data", Response::HTTP_BAD_REQUEST);
     }
 
     /**
-     * @Rest\Get("/getUserByMail/{$eMail}")
-     * @param $eMail
-     * @return user[]|array|View
+     * @Rest\Post("/register")
+     * @return View
      */
-    public function getUserByMail($eMail)
+    public function registerAction()
     {
-        return $eMail;
-        /*$restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findBy(['email' => $eMail]);
-        if ($restResult === null) {
-            return new View("there are no users exist", Response::HTTP_NOT_FOUND);
-        }
-        return $restResult; */
-    }
+        $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
 
-    /**
-     * @Rest\Get("/user/{id}")
-     */
-    public function idAction($id)
-    {
-        $singleresult = $this->getDoctrine()->getRepository('AppBundle:user')->find($id);
-        if ($singleresult === null) {
-            return new View("user not found", Response::HTTP_NOT_FOUND);
-        }
-        return $singleresult;
-    }
+        if ($contentType === "application/json") {
+            $content = trim(file_get_contents("php://input"));
+            $decoded = json_decode($content, true);
 
-    /**
-     * @Rest\Post("/user/")
-     */
-    public function postAction(Request $request)
-    {
-        $data = new User;
-        $name = $request->get('name');
-        if(empty($name))
-        {
-            return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE);
+            if (is_array($decoded)) {
+                /** @var user|null $restResult */
+                $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findOneBy(['benutzername' => $decoded['username']]);
+                if ($restResult !== null) {
+                    return new View("There exists already a user with this username", Response::HTTP_BAD_REQUEST);
+                }
+
+                /** @var user|null $restResult */
+                $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findOneBy(['email' => $decoded['email']]);
+                if ($restResult !== null) {
+                    return new View("There exists already a user with this email", Response::HTTP_BAD_REQUEST);
+                }
+
+                $data = new user();
+                $data->setVorname($decoded['firstname']);
+                $data->setNachname($decoded['lastname']);
+                $data->setGeburtstag($decoded['birthday']);
+                $data->setBenutzername($decoded['username']);
+                $data->setPasswort($decoded['password']);
+                $data->setVorname($decoded['email']);
+                $data->setAvatar('/');
+                $data->setRole($this->getDoctrine()->getRepository('AppBundle:role')->findOneBy(['name' => 'guest']));
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($data);
+                $em->flush();
+
+                return new View($restResult->getId(), Response::HTTP_OK);
+            } else {
+                return new View("Recieved non valid json data", Response::HTTP_BAD_REQUEST);
+            }
         }
-        $data->setVorname($name);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($data);
-        $em->flush();
-        return new View("User Added Successfully", Response::HTTP_OK);
+        return new View("Recieved non valid json data", Response::HTTP_BAD_REQUEST);
     }
 
     /**
      * @Rest\Put("/user/{id}")
      */
-    public function updateAction($id,Request $request)
+    public function updateAction($id, Request $request)
     {
         $data = new User;
         $name = $request->get('name');
@@ -82,24 +102,20 @@ class UserController extends FOSRestController
         $user = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
         if (empty($user)) {
             return new View("user not found", Response::HTTP_NOT_FOUND);
-        }
-        elseif(!empty($name) && !empty($role)){
+        } elseif (!empty($name) && !empty($role)) {
             $user->setName($name);
             $user->setRole($role);
             $sn->flush();
             return new View("User Updated Successfully", Response::HTTP_OK);
-        }
-        elseif(empty($name) && !empty($role)){
+        } elseif (empty($name) && !empty($role)) {
             $user->setRole($role);
             $sn->flush();
             return new View("role Updated Successfully", Response::HTTP_OK);
-        }
-        elseif(!empty($name) && empty($role)){
+        } elseif (!empty($name) && empty($role)) {
             $user->setName($name);
             $sn->flush();
             return new View("User Name Updated Successfully", Response::HTTP_OK);
-        }
-        else return new View("User name or role cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
+        } else return new View("User name or role cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
     }
 
     /**
@@ -112,8 +128,7 @@ class UserController extends FOSRestController
         $user = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
         if (empty($user)) {
             return new View("user not found", Response::HTTP_NOT_FOUND);
-        }
-        else {
+        } else {
             $sn->remove($user);
             $sn->flush();
         }

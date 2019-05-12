@@ -1,0 +1,36 @@
+AppBundle\Entity\address:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\addressRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        strasse:
+            type: string
+            length: 255
+        hausnummer:
+            type: string
+            length: 255
+        ort:
+            type: string
+            length: 255
+        plz:
+            type: string
+            length: 255
+        firma:
+            type: string
+            length: 255
+        aktiv:
+            type: boolean
+    manyToOne:
+        address:
+            targetEntity: AppBundle\Entity\user
+            inversedBy: addresses
+            joinColumn:
+                name: userId
+                referencedColumnName: id
+    lifecycleCallbacks: {  }

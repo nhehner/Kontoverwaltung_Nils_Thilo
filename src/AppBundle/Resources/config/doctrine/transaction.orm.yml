@@ -1,0 +1,48 @@
+AppBundle\Entity\transaction:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\transactionRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        erstellDatum:
+            type: datetime
+        zielIban:
+            type: string
+            length: 255
+        zielBic:
+            type: string
+            length: 255
+        zielInhaber:
+            type: string
+            length: 255
+        betrag:
+            type: string
+            length: 255
+        addInfos:
+            type: string
+            length: 255
+    manyToOne:
+        transactionUser:
+            targetEntity: AppBundle\Entity\user
+            inversedBy: transactions
+            joinColumn:
+                name: userId
+                referencedColumnName: id
+        transactionPayment:
+            targetEntity: AppBundle\Entity\payment
+            inversedBy: transactions
+            joinColumn:
+                name: paymentId
+                referencedColumnName: id
+        transactionKonto:
+            targetEntity: AppBundle\Entity\konto
+            inversedBy: transactions
+            joinColumn:
+                name: kontoId
+                referencedColumnName: id
+    lifecycleCallbacks: {  }

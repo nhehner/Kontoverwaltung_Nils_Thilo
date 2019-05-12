@@ -1,0 +1,28 @@
+AppBundle\Entity\payment:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\paymentRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        zahlungsanbieter:
+            type: string
+            length: 255
+        beschreibung:
+            type: string
+            length: 255
+        logo:
+            type: string
+            length: 255
+        apiUrl:
+            type: string
+            length: 255
+    oneToMany:
+        transaction:
+            targetEntity: AppBundle\Entity\transaction
+            mappedBy: transactionPayment
+    lifecycleCallbacks: {  }

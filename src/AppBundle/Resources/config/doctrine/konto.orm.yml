@@ -1,0 +1,45 @@
+AppBundle\Entity\konto:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\kontoRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        guthaben:
+            type: string
+            length: 255
+        beschreibung:
+            type: string
+            length: 255
+        iban:
+            type: string
+            length: 255
+        bic:
+            type: string
+            length: 255
+        inhaber:
+            type: string
+            length: 255
+        kreditkarte:
+            type: string
+            length: 255
+        gueltigBis:
+            type: datetime
+        aktiv:
+            type: boolean
+    manyToOne:
+        konto:
+            targetEntity: AppBundle\Entity\user
+            inversedBy: kontos
+            joinColumn:
+                name: userId
+                referencedColumnName: id
+    oneToMany:
+        transaction:
+            targetEntity: AppBundle\Entity\transaction
+            mappedBy: transactionKonto
+    lifecycleCallbacks: {  }

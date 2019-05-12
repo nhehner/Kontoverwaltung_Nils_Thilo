@@ -18,11 +18,26 @@ class UserController extends FOSRestController
      */
     public function getAction()
     {
-        $restresult = $this->getDoctrine()->getRepository('AppBundle:User')->findAll();
-        if ($restresult === null) {
+        $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findAll();
+        if ($restResult === null) {
             return new View("there are no users exist", Response::HTTP_NOT_FOUND);
         }
-        return $restresult;
+        return $restResult;
+    }
+
+    /**
+     * @Rest\Get("/getUserByMail/{$eMail}")
+     * @param $eMail
+     * @return user[]|array|View
+     */
+    public function getUserByMail($eMail)
+    {
+        return $eMail;
+        /*$restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findBy(['email' => $eMail]);
+        if ($restResult === null) {
+            return new View("there are no users exist", Response::HTTP_NOT_FOUND);
+        }
+        return $restResult; */
     }
 
     /**
@@ -30,7 +45,7 @@ class UserController extends FOSRestController
      */
     public function idAction($id)
     {
-        $singleresult = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
+        $singleresult = $this->getDoctrine()->getRepository('AppBundle:user')->find($id);
         if ($singleresult === null) {
             return new View("user not found", Response::HTTP_NOT_FOUND);
         }

@@ -68,19 +68,27 @@ class UserController extends FOSRestController
                     return new View("There exists already a user with this email", Response::HTTP_BAD_REQUEST);
                 }
 
+                $date = new \DateTime($decoded['birthday']);
+
                 $data = new user();
                 $data->setVorname($decoded['firstname']);
                 $data->setNachname($decoded['lastname']);
-                $data->setGeburtstag($decoded['birthday']);
+                $data->setGeburtstag(!empty($date) ? $date : new \DateTime("0000-00-00 00-00"));
                 $data->setBenutzername($decoded['username']);
                 $data->setPasswort($decoded['password']);
-                $data->setVorname($decoded['email']);
+                $data->setEmail($decoded['email']);
                 $data->setAvatar('/');
                 $data->setRole($this->getDoctrine()->getRepository('AppBundle:role')->findOneBy(['name' => 'guest']));
 
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($data);
                 $em->flush();
+
+                /** @var user $restResult */
+                $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findOneBy(['email' => $decoded['email']]);
+                if ($restResult === null) {
+                    return new View("Something went wrong, please try again.", Response::HTTP_BAD_REQUEST);
+                }
 
                 return new View($restResult->getId(), Response::HTTP_OK);
             } else {

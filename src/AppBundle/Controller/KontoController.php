@@ -71,14 +71,28 @@ class KontoController extends FOSRestController
             $decoded = json_decode($content, true);
 
             if (is_array($decoded)) {
-                /** @var array $restResult */
-                $restResult = $this->getDoctrine()->getRepository('AppBundle:user')->findBy(['id' => $decoded['userId']]);
+                /** @var user|null $restResult */
+                $restResult = $this->getDoctrine()->getRepository('AppBundle:konto')->findOneBy(['userId' => $decoded['userId'], 'iban' => $decoded['iban']]);
 
-                if ($restResult === null) {
+                if ($restResult !== null) {
                     return new View("There are no konto exist", Response::HTTP_NOT_FOUND);
                 }
 
                 $result = [];
+                $data = new konto();
+
+                $data->setBeschreibung($decoded['beschreibung']);
+                $data->setIban($decoded['iban']);
+                $data->setBic($decoded['bic']);
+                $data->setInhaber($decoded['inhaber']);
+                $data->setKreditkarte($decoded['kreditkarte']);
+                $data->setGueltigBis($decoded['gueltigBis']);
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($data);
+                $em->flush();
+
+                $restResult->setKontos($data);
 
                 /** @var user $user */
                 foreach ($restResult as $user) {

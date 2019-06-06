@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\konto;
+
 /**
  * kontoRepository
  *
@@ -10,4 +12,24 @@ namespace AppBundle\Repository;
  */
 class kontoRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * @param $userId
+     * @param $iban
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findOneByIbanJoinedToUser($userId, $iban)
+    {
+        $query = $this->getEntityManager()
+            ->createQuery(
+                'SELECT k
+    FROM AppBundle:konto k, AppBundle:user  u
+    WHERE u.id = :userId
+    And k.iban = :iban'
+            )
+            ->setParameter('userId', $userId)
+            ->setParameter('iban', $iban);
+
+        return $query->getResult();
+    }
 }

@@ -275,11 +275,13 @@ class user
     }
 
     /**
-     * @param konto $kontos
+     * @param $kontos
+     * @return $this
      */
     public function setKontos($kontos)
     {
-        $this->kontos = $kontos;
+        $this->kontos[] = $kontos;
+        return $this;
     }
 
     /**

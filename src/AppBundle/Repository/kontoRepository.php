@@ -32,4 +32,22 @@ class kontoRepository extends \Doctrine\ORM\EntityRepository
 
         return $query->getResult();
     }
+
+    /**
+     * @param $kontoId
+     * @return array
+     */
+    public function findTransactionsForKonto($kontoId)
+    {
+        $query = $this->getEntityManager()
+            ->createQuery(
+                'SELECT t
+    FROM AppBundle:konto k, AppBundle:transaction t
+    WHERE k.id = :kontoId
+    AND k.id = t.transactionKonto'
+            )
+            ->setParameter('kontoId', $kontoId);
+
+        return $query->getResult();
+    }
 }

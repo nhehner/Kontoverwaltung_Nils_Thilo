@@ -140,7 +140,6 @@ class KontoController extends FOSRestController
 
                 /** @var user|null $restResult */
                 $user = $this->getDoctrine()->getRepository('AppBundle:user')->find($decoded['userId']);
-
                 $user->setKontos($konto);
 
                 $em = $this->getDoctrine()->getManager();

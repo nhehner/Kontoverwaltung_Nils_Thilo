@@ -19,7 +19,7 @@ class TransactionController extends FOSRestController
      * @return View
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function createKonto()
+    public function createTransaction()
     {
         $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
 
@@ -40,7 +40,7 @@ class TransactionController extends FOSRestController
                 $user->setTransactions($transaction);
 
                 /** @var konto|null $konto */
-                $konto = $this->getDoctrine()->getRepository('AppBundle:konto')->findby(['konto' => $decoded['userId']]);
+                $konto = $this->getDoctrine()->getRepository('AppBundle:konto')->findOneBy(['konto' => $decoded['userId']]);
                 $konto->setTransaction($transaction);
 
                 /** @var payment|null $payment */
